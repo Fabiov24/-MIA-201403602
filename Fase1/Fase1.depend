@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1470016616 source:/home/fabio/Escritorio/Proyecto1/Fase1/main.c
+1470016998 source:/home/fabio/Escritorio/Proyecto1/Fase1/main.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
