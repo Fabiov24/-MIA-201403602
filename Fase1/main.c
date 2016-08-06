@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-//---------------------------------------------------------------------------------
+#include <stdio.h>
+/*********************************************************************************/
 char Entrada[400];
-//---------------------------------------------------------------------------------
+/*********************************************************************************/
+void CrearDisco(int size,char*path,char*name);
+/*********************************************************************************/
 
 void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entrada
     //printf("El texto total es: %s\n",Texto);
@@ -19,7 +21,6 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
             char *path="";
             char *name="";
             //reconocer acá los parámetros del mkdisk
-            printf("Vamos a crear un nuevo disco D:\n");
 
             temporal = completo;
 
@@ -37,7 +38,6 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     }
                     Size = atoi(temporal);
 
-                    printf("El tamaño del disco es: %s\n",temporal);
                 }else if(strcasecmp(temporal, "-path") ==0){
 
                     temporal= strtok(NULL, " ");
@@ -45,8 +45,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-
-                    printf("La ubicación del disco es: %s\n",temporal);
+                    path = temporal;
 
                 }else if(strcasecmp(temporal, "+unit") ==0){
 
@@ -55,8 +54,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-
-                    printf("Las unidades son: %s\n",temporal);
+                    unit = temporal;
 
                 }else if(strcasecmp(temporal, "-name") ==0){
 
@@ -65,8 +63,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-
-                    printf("El nombre del disco es: %s\n",temporal);
+                    name = temporal;
 
                 }else{
                     printf("Parámetro incorrecto: %s\n",temporal);
@@ -74,24 +71,41 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
                     temporal = strtok(NULL, ":: \\");
             }
+            if(Size != 0 && strcmp(path,"")!=0 && strcmp(name,"")!=0 ){
+                int SizeAnterior=Size;
+                if(Size<=0){
+                    printf("No es posible crear el disco, el tamaño debe ser mayor a cero.\n");
+                }
+                if(strcmp(unit,"")!=0){
+                    if(strcasecmp(unit,"k")==0){
+                        Size = Size * 1024;
+                    }else if(strcasecmp(unit,"m")==0){
+                        Size = Size * 1024*1024;
+                    }
+                }else{
+                    unit = "M";
+                    Size = Size * 1024*1024;
+                }
+                if(strcmp(path,"")==0){
+                    printf("No es posible crear el disco, debe ingresar una ubicación para crear el disco.\n");
+                }
+                if(strcmp(name,"")==0){
+                    printf("No es posible crear el disco, debe ingresar un nombre para el disco.\n");
+                }
+            /**Se imprimen los parámetros del disco*/
+                printf("Se creará un nuevo disco:\n");
+                printf("\t-El tamaño del disco es: %i %sB (%i bytes)\n",SizeAnterior,unit,Size);
+                printf("\t-La ubicación del disco es: %s\n",path);
+                printf("\t-El nombre del disco es: %s\n",name);
 
-            if(Size<=0){
-                printf("No es posible crear el disco, el tamaño debe ser mayor a cero.\n");
+            /**Se envían los parámetros al método para crear el disco*/
+                CrearDisco(Size,path,name);
+
+            }else{
+                printf("No es posible crear el disco, faltan parámetros obligatorios\n");
             }
-            if(strcmp(unit,"")!=0){
-                if(strcasecmp(unit,"k")==0){
-                Size = Size * 1024;
-                }
-                if(strcasecmp(unit,"m")==0){
-                Size = Size * 1024*1024;
-                }
-            }
-            if(strcmp(path,"")==0){
-                printf("No es posible crear el disco, debe ingresar una ubicación para crear el disco.\n");
-            }
-            if(strcmp(name,"")==0){
-                printf("No es posible crear el disco, debe ingrear un nombre para el disco.\n");
-            }
+
+
 
 //fin mkdisk
         }else if(strcasecmp(completo, "rmdisk") ==0){
@@ -159,10 +173,31 @@ int main()
             strcat(EntradaAnterior,Entrada);
 
             AnalizarEntrada(EntradaAnterior);
+        }else if(strcasecmp(Entrada,"clear")==0){
+            system("clear");
         }else{
             AnalizarEntrada(Entrada);
             //acá debería mandar a analizar el texto
         }
     }while(strcasecmp(Entrada, "exit") !=0);
     return 0;
+}
+
+void CrearDisco(int Size,char*path,char*name){
+    FILE  *Fichero;
+    int ContadorCeros=0;
+    printf("Creando disco...\n");
+
+    char*nombre=strtok(name,"\"");
+    Fichero = fopen (nombre, "w+b");
+//    fwrite (buffer, 1, leidos, Fichero);
+    if (Fichero==NULL){
+        perror("No se puede el fichero");
+    }
+    while (ContadorCeros<Size/4){
+         fwrite("0", 1, sizeof(ContadorCeros),Fichero);
+         ContadorCeros++;
+    }
+
+   fclose(Fichero);
 }
