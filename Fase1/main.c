@@ -13,11 +13,91 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
     completo = strtok (Texto," \\");
     if (completo != NULL)
     {
-        printf ("\nComando: %s\n",completo);
-
         if(strcasecmp(completo, "mkdisk") ==0){
+            int Size=0;
+            char *unit="";
+            char *path="";
+            char *name="";
             //reconocer acá los parámetros del mkdisk
             printf("Vamos a crear un nuevo disco D:\n");
+
+            temporal = completo;
+
+            temporal= strtok(NULL, " ::");
+
+            //temporal= strtok(NULL, "::");//printf("After after %s\n",temporal);
+
+            while(temporal != NULL){
+
+                if(strcasecmp(temporal, "-size") ==0){
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    Size = atoi(temporal);
+
+                    printf("El tamaño del disco es: %s\n",temporal);
+                }else if(strcasecmp(temporal, "-path") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+
+                    printf("La ubicación del disco es: %s\n",temporal);
+
+                }else if(strcasecmp(temporal, "+unit") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+
+                    printf("Las unidades son: %s\n",temporal);
+
+                }else if(strcasecmp(temporal, "-name") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+
+                    printf("El nombre del disco es: %s\n",temporal);
+
+                }else{
+                    printf("Parámetro incorrecto: %s\n",temporal);
+                }
+
+                    temporal = strtok(NULL, ":: \\");
+            }
+
+            if(Size<=0){
+                printf("No es posible crear el disco, el tamaño debe ser mayor a cero.\n");
+            }
+            if(strcmp(unit,"")!=0){
+                if(strcasecmp(unit,"k")==0){
+                Size = Size * 1024;
+                }
+                if(strcasecmp(unit,"m")==0){
+                Size = Size * 1024*1024;
+                }
+            }
+            if(strcmp(path,"")==0){
+                printf("No es posible crear el disco, debe ingresar una ubicación para crear el disco.\n");
+            }
+            if(strcmp(name,"")==0){
+                printf("No es posible crear el disco, debe ingrear un nombre para el disco.\n");
+            }
+
+//fin mkdisk
+        }else if(strcasecmp(completo, "rmdisk") ==0){
+            //reconocer acá los parámetros del rmdisk
+
+            printf("Vamos a eliminar el disco D:\n");
 
             temporal = completo;
 
@@ -29,15 +109,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
             while(temporal != NULL){
 
-                if(strcasecmp(temporal, "-size") ==0){
-                    temporal= strtok(NULL, " ");
-
-                    if (temporal[0] == ':'){
-                        memmove(temporal, temporal+1, strlen(temporal));
-                    }
-
-                    printf("el tamaño del disco es: %s\n",temporal);
-                }else if(strcasecmp(temporal, "-path") ==0){
+                if(strcasecmp(temporal, "-path") ==0){
 
                     temporal= strtok(NULL, " ");
 
@@ -47,27 +119,18 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
                     printf("la ubicación del disco es: %s\n",temporal);
 
-                }else if(strcasecmp(temporal, "+unit") ==0){
-
-                    temporal= strtok(NULL, " ");
-
-                    if (temporal[0] == ':'){
-                        memmove(temporal, temporal+1, strlen(temporal));
-                    }
-
-                    printf("las unidades son: %s\n",temporal);
-
                 }else{
-                    printf("no entro\n");
+                    printf("Parámetro incorrecto\n");
                 }
 
                     temporal = strtok(NULL, "::");
             }
 
-
-        }else if(strcasecmp(completo, "rmdisk") ==0){
-            //reconocer acá los parámetros del rmdisk
+//fin rmdisk
+        }else{
+            printf("Comando indicado incorrecto.\n");
         }
+
     }
 }
 
