@@ -15,6 +15,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
     completo = strtok (Texto," \\");
     if (completo != NULL)
     {
+    /**acá inicia el análisis del mkdisk-----------------------------------------------------------------------------*/
         if(strcasecmp(completo, "mkdisk") ==0){
             int Size=0;
             char *unit="";
@@ -66,7 +67,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     name = temporal;
 
                 }else{
-                    printf("Parámetro incorrecto: %s\n",temporal);
+                    printf("El parámetro %s no pertenece a rmdisk.\n",temporal);
                 }
 
                     temporal = strtok(NULL, ":: \\");
@@ -107,7 +108,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
 
 
-//fin mkdisk
+/**acá inicia el análisis del rmdisk-----------------------------------------------------------------------------*/
         }else if(strcasecmp(completo, "rmdisk") ==0){
             //reconocer acá los parámetros del rmdisk
 
@@ -117,9 +118,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
             temporal= strtok(NULL, " ::");
 
-            //temporal= strtok(NULL, "::");
-
-            //printf("After after %s\n",temporal);
+            //temporal= strtok(NULL, "::"); printf("After after %s\n",temporal);
 
             while(temporal != NULL){
 
@@ -131,17 +130,163 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
 
-                    printf("la ubicación del disco es: %s\n",temporal);
+                    printf("La ubicación del disco es: %s\n",temporal);
 
                 }else{
-                    printf("Parámetro incorrecto\n");
+                    printf("El parámetro %s no pertenece a rmdisk.\n",temporal);
                 }
 
                     temporal = strtok(NULL, "::");
             }
 
-//fin rmdisk
+
+        }else if(strcasecmp(completo, "fdisk") ==0){
+/**acá inicia el análisis del fdisk------------------------------------------------------------------------------*/
+
+            int Size=0;         //--------------
+            char *unit="";      //--------------
+            char *path="";      //--------------
+            char *type="";      //--------------
+            char *fit="";
+            char *Delete="";
+            char *name="";      //--------------
+            char *add="";
+            //reconocer acá los parámetros del mkdisk
+
+            temporal = completo;
+
+            temporal= strtok(NULL, " ::");
+
+            //temporal= strtok(NULL, "::");//printf("After after %s\n",temporal);
+
+            while(temporal != NULL){
+
+                if(strcasecmp(temporal, "-size") ==0){
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    Size = atoi(temporal);
+
+                }else if(strcasecmp(temporal, "-path") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    path = temporal;
+
+                }else if(strcasecmp(temporal, "+unit") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    unit = temporal;
+
+                }else if(strcasecmp(temporal, "-name") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    name = temporal;
+
+                }else if(strcasecmp(temporal, "+type") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    unit = temporal;
+
+                }else if(strcasecmp(temporal, "+fit") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    unit = temporal;
+
+                }else if(strcasecmp(temporal, "+delete") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    unit = temporal;
+
+                }else if(strcasecmp(temporal, "+add") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    unit = temporal;
+
+                }else{
+                    printf("El parámetro %s no pertenece a fdisk.\n",temporal);
+                }
+
+                    temporal = strtok(NULL, ":: \\");
+            }
+            if(Size != 0 && strcmp(path,"")!=0 && strcmp(name,"")!=0 ){
+                int SizeAnterior=Size;
+                if(Size<=0){
+                    printf("No es posible crear el disco, el tamaño debe ser mayor a cero.\n");
+                }
+                if(strcmp(unit,"")!=0){
+                    if(strcasecmp(unit,"k")==0){
+                        Size = Size * 1024;
+                    }else if(strcasecmp(unit,"m")==0){
+                        Size = Size * 1024*1024;
+                    }
+                }else{
+                    unit = "M";
+                    Size = Size * 1024*1024;
+                }
+                if(strcmp(path,"")==0){
+                    printf("No es posible crear el disco, debe ingresar una ubicación para crear el disco.\n");
+                }
+                if(strcmp(name,"")==0){
+                    printf("No es posible crear el disco, debe ingresar un nombre para el disco.\n");
+                }
+            /**Se imprimen los parámetros del disco*/
+                printf("Se creará un nuevo disco:\n");
+                printf("\t-El tamaño del disco es: %i %sB (%i bytes)\n",SizeAnterior,unit,Size);
+                printf("\t-La ubicación del disco es: %s\n",path);
+                printf("\t-El nombre del disco es: %s\n",name);
+
+            /**Se envían los parámetros al método para crear el disco*/
+                CrearDisco(Size,path,name);
+
+            }else{
+                printf("No es posible crear el disco, faltan parámetros obligatorios\n");
+            }
+
+
+
+
+
+
+        }else if(strcasecmp(completo, "mount") ==0){
+/**acá inicia el análisis del mount------------------------------------------------------------------------------*/
+
+
+        }else if(strcasecmp(completo, "umount") ==0){
+        /**acá inicia el análisis del umount-----------------------------------------------------------------------------*/
+
+
         }else{
+        /**por el momento solo estos comandos, agregar el resto acá------------------------------------------------------*/
             printf("Comando indicado incorrecto.\n");
         }
 
@@ -182,22 +327,37 @@ int main()
     }while(strcasecmp(Entrada, "exit") !=0);
     return 0;
 }
-
+/** Actualizar para validar si ya existe el disco o no :v*/
 void CrearDisco(int Size,char*path,char*name){
     FILE  *Fichero;
     int ContadorCeros=0;
-    printf("Creando disco...\n");
+    printf("\nCreando disco...\n");
 
     char*nombre=strtok(name,"\"");
-    Fichero = fopen (nombre, "w+b");
-//    fwrite (buffer, 1, leidos, Fichero);
-    if (Fichero==NULL){
-        perror("No se puede el fichero");
-    }
-    while (ContadorCeros<Size/4){
+
+    char*ruta=strtok(path,"\"");
+
+    char ValidarRuta[70]="mkdir -p ";
+
+    strcat(ValidarRuta,ruta);
+
+    system(ValidarRuta);
+
+    strcat(ruta,nombre);
+
+    Fichero = fopen (ruta, "w+b");
+
+//    if (Fichero==NULL){
+
+        while (ContadorCeros<Size/4){
          fwrite("0", 1, sizeof(ContadorCeros),Fichero);
          ContadorCeros++;
-    }
+        }
+        printf("Se creó el disco correctamente :D\n");
+  /*  }else{
+        perror("No es posible crear el disco");
+        }*/
 
    fclose(Fichero);
 }
+
