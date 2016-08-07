@@ -67,7 +67,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     name = temporal;
 
                 }else{
-                    printf("El parámetro %s no pertenece a rmdisk.\n",temporal);
+                    printf("El parámetro %s no pertenece a mkdisk.\n",temporal);
                 }
 
                     temporal = strtok(NULL, ":: \\");
@@ -111,8 +111,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 /**acá inicia el análisis del rmdisk-----------------------------------------------------------------------------*/
         }else if(strcasecmp(completo, "rmdisk") ==0){
             //reconocer acá los parámetros del rmdisk
-
-            printf("Vamos a eliminar el disco D:\n");
+            char ruta[100];
 
             temporal = completo;
 
@@ -129,14 +128,25 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-
-                    printf("La ubicación del disco es: %s\n",temporal);
-
+                    strcpy(ruta,temporal);
                 }else{
                     printf("El parámetro %s no pertenece a rmdisk.\n",temporal);
                 }
 
                     temporal = strtok(NULL, "::");
+            }
+            if(strcmp(ruta,"")!=0){
+                printf("Se eliminará un disco:\n");
+                char*nombre=strtok(ruta,"\"");
+                printf("\t-La ubicación del disco a eliminar es: %s\n",ruta);
+                FILE* Fichero;
+
+                    printf("Eliminando disco...\n");
+                    if(remove(nombre)==0){
+                        printf("Se borró el disco exitosamente :D\n");
+                    }else{
+                        printf("Debe ingresar una ruta de un disco existente.\n");
+                    }
             }
 
 
@@ -237,7 +247,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                 }
 
                     temporal = strtok(NULL, ":: \\");
-            }
+            }/**Acá debo ver lo del fdisk*/
             if(Size != 0 && strcmp(path,"")!=0 && strcmp(name,"")!=0 ){
                 int SizeAnterior=Size;
                 if(Size<=0){
@@ -267,7 +277,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
             /**Se envían los parámetros al método para crear el disco*/
                 CrearDisco(Size,path,name);
-
+                /**Acá debo ver lo del fdisk*/
             }else{
                 printf("No es posible crear el disco, faltan parámetros obligatorios\n");
             }
@@ -278,7 +288,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
 
         }else if(strcasecmp(completo, "mount") ==0){
-/**acá inicia el análisis del mount------------------------------------------------------------------------------*/
+        /**acá inicia el análisis del mount------------------------------------------------------------------------------*/
 
 
         }else if(strcasecmp(completo, "umount") ==0){
@@ -295,8 +305,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
 
 
-int main()
-{
+int main(){
+
     system("clear");
 
     printf("------------------ Bienvenido al sistema  ------------------ \n");
@@ -327,7 +337,7 @@ int main()
     }while(strcasecmp(Entrada, "exit") !=0);
     return 0;
 }
-/** Actualizar para validar si ya existe el disco o no :v*/
+
 void CrearDisco(int Size,char*path,char*name){
     FILE  *Fichero;
     int ContadorCeros=0;
@@ -347,16 +357,13 @@ void CrearDisco(int Size,char*path,char*name){
 
     Fichero = fopen (ruta, "w+b");
 
-//    if (Fichero==NULL){
+
 
         while (ContadorCeros<Size/4){
          fwrite("0", 1, sizeof(ContadorCeros),Fichero);
          ContadorCeros++;
         }
         printf("Se creó el disco correctamente :D\n");
-  /*  }else{
-        perror("No es posible crear el disco");
-        }*/
 
    fclose(Fichero);
 }
