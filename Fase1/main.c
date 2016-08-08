@@ -66,6 +66,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     }
                     name = temporal;
 
+                }else if(strcasecmp(temporal,"\n")==0){
                 }else{
                     printf("El parámetro %s no pertenece a mkdisk.\n",temporal);
                 }
@@ -295,6 +296,57 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
         /**acá inicia el análisis del umount-----------------------------------------------------------------------------*/
 
 
+        }else if(strcasecmp(completo,"exec")==0){
+// modificar esta info :v
+
+            char ruta[100];
+
+            temporal = completo;
+
+            temporal= strtok(NULL, " ::");
+
+            //temporal= strtok(NULL, "::"); printf("After after %s\n",temporal);
+
+            while(temporal != NULL){
+
+                if(strcasecmp(temporal, "-path") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    strcpy(ruta,temporal);
+                }else{
+                    printf("El parámetro %s no pertenece a exec.\n",temporal);
+                }
+
+                    temporal = strtok(NULL, "::");
+            }
+
+            char*path=strtok(ruta,"\"");
+
+            FILE *file = fopen (path, "r");
+            char Texto[200];
+            char Aux[200];
+            if(file != NULL){
+                while(feof(file)==0){
+                    strcpy(Texto,"");
+                    fgets(Texto,100,file);
+                    strcpy(Aux, Texto);
+                    if(Aux[0] != '#'){
+                        if((strcasecmp(Texto,"") != 0)){
+                            printf("\n\t----Script: %s\n", Texto);
+                            AnalizarEntrada(Texto);
+                        }
+
+                    }else{
+                        printf("\n\t----Comentario: %s\n", Aux);
+                    }
+                }
+                fclose(file);
+            }
+        }else if(strcasecmp(completo,"\n")==0){
         }else{
         /**por el momento solo estos comandos, agregar el resto acá------------------------------------------------------*/
             printf("Comando indicado incorrecto.\n");
@@ -330,6 +382,7 @@ int main(){
             AnalizarEntrada(EntradaAnterior);
         }else if(strcasecmp(Entrada,"clear")==0){
             system("clear");
+        }else if(strcasecmp(Entrada,"\n")==0){
         }else{
             AnalizarEntrada(Entrada);
             //acá debería mandar a analizar el texto
