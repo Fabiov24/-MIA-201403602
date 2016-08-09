@@ -384,6 +384,68 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                 fclose(file);
             }
         }else if(strcasecmp(completo,"\n")==0){
+        //esto creo que está de más
+        }else if(strcasecmp(completo, "rep") ==0){
+        /**acá inicia el análisis del rep------------------------------------------------------------------------------*/
+
+            char *name="";
+            char *path="";
+            char *id="";
+            char *ruta="";
+            //reconocer acá los parámetros del rep
+
+            temporal = completo;
+
+            temporal= strtok(NULL, " ::");
+
+
+            while(temporal != NULL){
+
+                if(strcasecmp(temporal, "-name") ==0){
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    name=temporal;
+
+                }else if(strcasecmp(temporal, "-path") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    path = temporal;
+
+                }else if(strcasecmp(temporal, "-id") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    id = temporal;
+
+                }else if(strcasecmp(temporal, "+ruta") ==0){
+
+                    temporal= strtok(NULL, " ");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    ruta = temporal;
+
+                }else if(strcasecmp(temporal,"\n")==0){
+                }else{
+                    printf("El parámetro %s no pertenece a rep.\n",temporal);
+                }
+
+                    temporal = strtok(NULL, ":: \\");
+            }
+
+
+
         }else{
         /**por el momento solo estos comandos, agregar el resto acá------------------------------------------------------*/
             printf("Comando indicado incorrecto.\n");
@@ -460,7 +522,7 @@ if(Size >= 10485760){
         printf("%s", TiempoActual);
         strcpy(mabore.mbr_fecha_creacion,TiempoActual);
 
-        mabore.mbr_disk_signature = (rand() % 26);
+        mabore.mbr_disk_signature = (rand() % 26 +1);
         mabore.mbr_part_1.part_status = 'empty';
         mabore.mbr_part_2.part_status = 'empty';
         mabore.mbr_part_3.part_status = 'empty';
