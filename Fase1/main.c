@@ -2,10 +2,47 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-/*********************************************************************************/
+#include <time.h>
+
+/**********************VARIABLES**************************************************/
 char Entrada[400];
-/*********************************************************************************/
+/**********************MÉTODOS****************************************************/
 void CrearDisco(int size,char*path,char*name);
+/*********************************************************************************/
+
+/**********************STRUCTS****************************************************/
+struct Particion{
+	char part_status;
+	char part_type;
+	char part_fit;
+    int  part_start;
+    int  part_size;
+    char part_name[128];
+};
+
+struct MBR{
+	int mbr_tamano;
+	char mbr_fecha_creacion[50];
+	int mbr_disk_signature;
+	struct Particion mbr_part_1;
+	struct Particion mbr_part_2;
+	struct Particion mbr_part_3;
+	struct Particion mbr_part_4;
+	char part_nombre[50];
+	int part_inicio;
+	int part_tam;
+};
+
+struct EBR{
+	char part_status;
+	char part_fit;
+    int part_start;
+	int part_size;
+	int part_next;
+    int part_previous;
+	char part_name[25];
+};
+
 /*********************************************************************************/
 
 void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entrada
@@ -396,6 +433,7 @@ void CrearDisco(int Size,char*path,char*name){
     int ContadorCeros=0;
     printf("\nCreando disco...\n");
 
+if(Size >= 10485760){
     char*nombre=strtok(name,"\"");
 
     char*ruta=strtok(path,"\"");
@@ -410,14 +448,50 @@ void CrearDisco(int Size,char*path,char*name){
 
     Fichero = fopen (ruta, "w+b");
 
+        struct MBR mabore;
+
+        time_t tiempo = time(0);
+        struct tm *tlocal = localtime(&tiempo);
+        char TiempoActual[128];
+
+        mabore.mbr_tamano = Size;
+
+        strftime(TiempoActual,128,"%d/%m/%y %H:%M:%S\n",tlocal);
+        printf("%s", TiempoActual);
+        strcpy(mabore.mbr_fecha_creacion,TiempoActual);
+
+        mabore.mbr_disk_signature = (rand() % 26);
+        mabore.mbr_part_1.part_status = 'empty';
+        mabore.mbr_part_2.part_status = 'empty';
+        mabore.mbr_part_3.part_status = 'empty';
+        mabore.mbr_part_4.part_status = 'empty';
 
 
-        while (ContadorCeros<Size/4){
+        while (ContadorCeros<(Size/4)){
          fwrite("0", 1, sizeof(ContadorCeros),Fichero);
          ContadorCeros++;
         }
+        rewind(Fichero);
+        fwrite(&mabore, sizeof(mabore), 1, Fichero);
+        //fwrite(&mabore,1,sizeof(mabore), Fichero);
+        fclose(Fichero);
         printf("Se creó el disco correctamente :D\n");
 
-   fclose(Fichero);
+//esto es para leer el archivo
+        struct MBR mbr;
+        FILE *disco;
+        if((fopen (ruta, "rb+")) != NULL){
+            disco = fopen (ruta, "rb+");
+        }else{
+            printf("No existe el archivo indicado :(\n");
+        }
+
+        fread (&mbr, sizeof(mbr), 1,disco);
+//línea de prueba de lectura del struct D:
+        printf("Fecha de creación: %s \n",mbr.mbr_fecha_creacion);
+
+}else{
+    printf("* Error: El tamaño mínimo del disco debe ser de 10MB.\n");
+}
 }
 
