@@ -45,6 +45,8 @@ struct EBR{
 
 /*********************************************************************************/
 
+
+
 void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entrada
     //printf("El texto total es: %s\n",Texto);
     char *completo;
@@ -289,29 +291,80 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
             if(Size != 0 && strcmp(path,"")!=0 && strcmp(name,"")!=0 ){
                 int SizeAnterior=Size;
                 if(Size<=0){
-                    printf("No es posible crear el disco, el tamaño debe ser mayor a cero.\n");
+                    printf("No es posible crear la partición, el tamaño debe ser mayor a cero.\n");
                 }
                 if(strcmp(unit,"")!=0){
                     if(strcasecmp(unit,"k")==0){
                         Size = Size * 1024;
+                        add = add * 1024;
                     }else if(strcasecmp(unit,"m")==0){
                         Size = Size * 1024*1024;
+                        add = add * 1024*1024;
                     }
                 }else{
                     unit = "M";
                     Size = Size * 1024*1024;
+                    add = add * 1024*1024;
                 }
                 if(strcmp(path,"")==0){
-                    printf("No es posible crear el disco, debe ingresar una ubicación para crear el disco.\n");
+                    printf("No es posible crear la partición, debe ingresar la ubicación del disco deseado.\n");
                 }
                 if(strcmp(name,"")==0){
-                    printf("No es posible crear el disco, debe ingresar un nombre para el disco.\n");
+                    printf("No es posible crear la partición, debe ingresar un nombre para la partición.\n");
                 }
-            /**Se imprimen los parámetros del disco*/
-                printf("Se creará un nuevo disco:\n");
-                printf("\t-El tamaño del disco es: %i %sB (%i bytes)\n",SizeAnterior,unit,Size);
+
+                if(strcmp(type,"")!=0){
+                    if(strcasecmp(type,"p")==0){
+
+                    }else if(strcasecmp(type,"e")==0){
+
+                    }else if(strcasecmp(type,"l")==0){
+
+                    }else{
+                        strcpy(type,"ERROR");
+                        printf("Error, tipo de partición incorrecto.\n");
+                    }
+                }else{
+                    strcpy(type,"p");
+                }
+
+                if(strcmp(fit,"")!=0){
+                    if(strcasecmp(fit,"wf")==0){
+
+                    }else if(strcasecmp(fit,"bf")==0){
+
+                    }else if(strcasecmp(fit,"ff")==0){
+
+                    }else{
+                        strcpy(fit,"ERROR");
+                        printf("Error, ajuste incorrecto.\n");
+                    }
+                }else{
+                    strcpy(fit,"wf");
+                }
+
+                if(strcmp(Delete,"")!=0){
+                    if(strcasecmp(Delete,"fast")==0){
+
+                    }else if(strcasecmp(Delete,"full")==0){
+
+                    }else{
+                        strcpy(Delete,"ERROR");
+                        printf("Error, parámetro de eliminacin incorrecto.\n");
+                    }
+                }
+
+                if(strcmp(add,"")!=0){
+                }
+
+
+            /**Se imprimen los parámetros de la partición*/
+                printf("Se creará una nueva partición:\n");
+
+
+                printf("\t-El tamaño es: %i %sB (%i bytes)\n",SizeAnterior,unit,Size);
                 printf("\t-La ubicación del disco es: %s\n",path);
-                printf("\t-El nombre del disco es: %s\n",name);
+                printf("\t-El nombre de la partición es: %s\n",name);
 
             /**Se envían los parámetros al método para crear el disco*/
                 CrearDisco(Size,path,name);
@@ -482,6 +535,7 @@ int main(){
         }else if(strcasecmp(Entrada,"clear")==0){
             system("clear");
         }else if(strcasecmp(Entrada,"\n")==0){
+        }else if(strcasecmp(Entrada,"exit")==0){
         }else{
             AnalizarEntrada(Entrada);
             //acá debería mandar a analizar el texto
