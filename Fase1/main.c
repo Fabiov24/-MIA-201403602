@@ -8,13 +8,13 @@
 char Entrada[400];
 /**********************MÉTODOS****************************************************/
 void CrearDisco(int size,char*path,char*name);
-void CrearParticion(int size,char*path,char*name,char* unit,char* type,char* fit,char* Delete,char* add);
+void CrearParticion(int size,char path[],char name[],char unit[],char type[],char fit[],char Delete[],int add);
 
 /*********************************************************************************/
 
 /**********************STRUCTS****************************************************/
 struct Particion{
-	char part_status;
+	char part_status[10];
 	char part_type;
 	char part_fit;
     int  part_start;
@@ -36,7 +36,7 @@ struct MBR{
 };
 
 struct EBR{
-	char part_status;
+	char part_status[10];
 	char part_fit;
     int part_start;
 	int part_size;
@@ -209,13 +209,20 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 /**acá inicia el análisis del fdisk------------------------------------------------------------------------------*/
 
             int Size=0;
-            char *unit="";
-            char *path="";
-            char *type="";
-            char *fit="";
-            char *Delete="";
-            char *name="";
-            int add="";
+            char unit[2];
+            char path[100];
+            char type[2];
+            char fit[2];
+            char Delete[50];
+            char name[100];
+            int add=0;
+
+            strcpy(unit,"");
+            strcpy(path,"");
+            strcpy(type,"");
+            strcpy(fit,"");
+            strcpy(Delete,"");
+            strcpy(name,"");
 
             temporal = completo;
 
@@ -232,6 +239,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
                     Size = atoi(temporal);
+                    //add = Size;
 
                 }else if(strcasecmp(temporal, "-path") ==0){
 
@@ -240,7 +248,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    path = temporal;
+                    //path = temporal;
+                    strcpy(path,temporal);
 
                 }else if(strcasecmp(temporal, "+unit") ==0){
 
@@ -249,7 +258,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    unit = temporal;
+                    //unit = temporal;
+                    strcpy(unit,temporal);
 
                 }else if(strcasecmp(temporal, "-name") ==0){
 
@@ -258,7 +268,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    name = temporal;
+                    //name = temporal;
+                    strcpy(name,temporal);
 
                 }else if(strcasecmp(temporal, "+type") ==0){
 
@@ -267,7 +278,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    unit = temporal;
+                    //type = temporal;
+                    strcpy(type,temporal);
 
                 }else if(strcasecmp(temporal, "+fit") ==0){
 
@@ -276,7 +288,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    unit = temporal;
+                    //fit = temporal;
+                    strcpy(fit,temporal);
 
                 }else if(strcasecmp(temporal, "+delete") ==0){
 
@@ -285,7 +298,9 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    Delete = temporal;
+
+                    //Delete = temporal;
+                    strcpy(Delete,temporal);
 
                 }else if(strcasecmp(temporal, "+add") ==0){
 
@@ -294,7 +309,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    add = temporal;
+                    add = atoi(temporal);
+
 
                 }else{
                     printf("El parámetro %s no pertenece a fdisk.\n",temporal);
@@ -317,10 +333,12 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                         Size = Size * 1024*1024;
                         add = add * 1024*1024;
                     }
+                    else if(strcasecmp(unit,"b")==0){
+                    }
                 }else{
-                    unit = "M";
-                    Size = Size * 1024*1024;
-                    add = add * 1024*1024;
+                    strcpy(unit,"K");
+                    Size = Size * 1024;
+                    add = add * 1024;
                 }
                 if(strcmp(path,"")==0){
                     printf("No es posible crear la partición, debe ingresar la ubicación del disco deseado.\n");
@@ -368,6 +386,9 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                         strcpy(Delete,"ERROR");
                         printf("Error, parámetro de eliminacin incorrecto.\n");
                     }
+                }
+
+                if(strcmp(Delete,"")!=0){
                 }
 
             /**Se imprimen los parámetros de la partición*/
@@ -521,6 +542,7 @@ int main(){
 
     printf("------------------ Bienvenido al sistema  ------------------ \n");
 
+
     do{
     printf("Ingresar un comando \n");
     scanf(" %[^\n]s", Entrada);
@@ -590,10 +612,10 @@ if(Size >= 10485760){
         strcpy(mabore.mbr_fecha_creacion,TiempoActual);
 
         mabore.mbr_disk_signature = (rand() % 26 +1);
-        mabore.mbr_part_1.part_status = 'empty';
-        mabore.mbr_part_2.part_status = 'empty';
-        mabore.mbr_part_3.part_status = 'empty';
-        mabore.mbr_part_4.part_status = 'empty';
+        strcpy(mabore.mbr_part_1.part_status ,"empty");
+        strcpy(mabore.mbr_part_2.part_status ,"empty");
+        strcpy(mabore.mbr_part_3.part_status ,"empty");
+        strcpy(mabore.mbr_part_4.part_status ,"empty");
 
 
         while (ContadorCeros<(Size/4)){
@@ -625,18 +647,159 @@ if(Size >= 10485760){
 }
 
 
-void CrearParticion(int size,char*path,char*name,char* unit,char* type,char* fit,char* Delete,char* add){
+void CrearParticion(int Size,char path[],char name[],char unit[],char type[],char fit[],char Delete[],int add){
 
 char*ruta=strtok(path,"\"");
-FILE * Disco = fopen(ruta, "r+b");
+char*nombre=strtok(name,"\"");
+FILE * DiscoActual = fopen(ruta, "r+b");
 
-        if(Disco != NULL) //Validar que el archivo exista
-        {
+printf("Creando partición...\n");
+
+if(DiscoActual != NULL){ //Validar que el archivo exista
+    if(strcasecmp(unit,"") == 0 || strcasecmp(unit,"b") == 0 || strcasecmp(unit,"k") == 0 || strcasecmp(unit,"m") == 0){
+        if(strcmp(fit,"") == 0 || strcmp(fit,"bf") == 0 || strcmp(fit,"ff") == 0 || strcmp(fit,"wf") == 0){
+
+        struct MBR mbr;
+        fread (&mbr, sizeof(mbr), 1,DiscoActual);
+
+
+        if((strcmp(Delete,"") == 0) && (add == 0)) { //cuando cumple esto es porque va a crear una partición  :v
+            if(Size>=2048){
+
+                if(strcmp(type,"") == 0 || strcmp(type,"p") == 0 ){
+
+                    if((strcmp(mbr.mbr_part_1.part_status,"empty")==0) || (strcmp(mbr.mbr_part_2.part_status,"empty")==0) || (strcmp(mbr.mbr_part_3.part_status,"empty")==0 )|| (strcmp(mbr.mbr_part_4.part_status,"empty")==0 )){
+
+                        if(strcasecmp(mbr.mbr_part_1.part_status,"empty")==0){
+                            /** Encontró espacio disponible en la partición 1 */
+                            int Inicio_Espacio_Disponible= sizeof(mbr);
+                            int Final_Espacio_Disponible = mbr.mbr_tamano;
+
+                            if((Final_Espacio_Disponible - Inicio_Espacio_Disponible) >= Size){
+
+                                    strcpy(mbr.mbr_part_1.part_name, nombre);
+                                    mbr.mbr_part_1.part_start = Inicio_Espacio_Disponible;
+                                    strcpy(mbr.mbr_part_1.part_status,"Busy");
+                                    mbr.mbr_part_1.part_size = Size;
+                                    mbr.mbr_part_1.part_type = 'P';
+                                    mbr.mbr_part_1.part_fit = fit[0];
+
+                                    printf("Se creó la partición primaria %s exitosamente, en la posición 1.\n", name);
+
+                            }else{
+                                  printf("No fue posible crear la partición, no queda espacio disponible.\n");
+                            }
+                        }
+                        else if(strcasecmp(mbr.mbr_part_2.part_status,"empty")==0){
+
+                        /** Encontró espacio disponible en la partición 2 */
+
+                            int Inicio_Espacio_Disponible= mbr.mbr_part_1.part_start + mbr.mbr_part_1.part_size;
+                            int Final_Espacio_Disponible = mbr.mbr_tamano ;
+
+                            if((Final_Espacio_Disponible - Inicio_Espacio_Disponible) >= Size){
+
+                                    strcpy(mbr.mbr_part_2.part_name, nombre);
+                                    mbr.mbr_part_2.part_start = Inicio_Espacio_Disponible;
+                                    strcpy(mbr.mbr_part_2.part_status,"Busy");
+                                    mbr.mbr_part_2.part_size = Size;
+                                    mbr.mbr_part_2.part_type = 'P';
+                                    mbr.mbr_part_2.part_fit = fit[0];
+
+                                    printf("Se creó la partición primaria %s exitosamente, en la posición 2.\n", name);
+
+                            }else{
+                                  printf("No fue posible crear la partición, no queda espacio disponible.\n");
+                            }
+
+                        }
+                        else if(strcasecmp(mbr.mbr_part_3.part_status,"empty")==0){
+
+                            /** Encontró espacio disponible en la partición 3 */
+
+                            int Inicio_Espacio_Disponible= mbr.mbr_part_2.part_start + mbr.mbr_part_2.part_size;
+                            int Final_Espacio_Disponible = mbr.mbr_tamano ;
+
+                            if((Final_Espacio_Disponible - Inicio_Espacio_Disponible) >= Size){
+
+                                    strcpy(mbr.mbr_part_3.part_name, nombre);
+                                    mbr.mbr_part_3.part_start = Inicio_Espacio_Disponible;
+                                    strcpy(mbr.mbr_part_3.part_status,"Busy");
+                                    mbr.mbr_part_3.part_size = Size;
+                                    mbr.mbr_part_3.part_type = 'P';
+                                    mbr.mbr_part_3.part_fit = fit[0];
+
+                                    printf("Se creó la partición primaria %s exitosamente, en la posición 3.\n", name);
+
+                            }else{
+                                  printf("No fue posible crear la partición, no queda espacio disponible.\n");
+                            }
+
+
+                        }
+                        else if(strcasecmp(mbr.mbr_part_4.part_status,"empty")==0){
+
+                       /** Encontró espacio disponible en la partición 4 */
+
+                            int Inicio_Espacio_Disponible= mbr.mbr_part_3.part_start + mbr.mbr_part_3.part_size;
+                            int Final_Espacio_Disponible = mbr.mbr_tamano ;
+
+                            if((Final_Espacio_Disponible - Inicio_Espacio_Disponible) >= Size){
+
+                                    strcpy(mbr.mbr_part_4.part_name, nombre);
+                                    mbr.mbr_part_4.part_start = Inicio_Espacio_Disponible;
+                                    strcpy(mbr.mbr_part_4.part_status,"Busy");
+                                    mbr.mbr_part_4.part_size = Size;
+                                    mbr.mbr_part_4.part_type = 'P';
+                                    mbr.mbr_part_4.part_fit = fit[0];
+
+                                    printf("Se creó la partición primaria %s exitosamente, en la posición 4.\n", name);
+
+                            }else{
+                                  printf("No fue posible crear la partición, no queda espacio disponible.\n");
+                            }
+
+                        }else{
+                            printf("\n");
+                        }
+
+
+
+                    }else{
+                        printf("Se encuentran ocupadas las 4 particiones, no es posible crear más.\n");
+                    }
+
+                }else if(strcmp(type,"e") == 0){
+
+                }
+
+
+            }else{
+                printf("Error, el tamaño mínimo de una partición debe ser de 2MB.\n");
+            }
+
+        }else{
+            printf("Esto no lo he validado todavía D: %i\n",add);
+        }
+
+
+        //fseek(disco,0,SEEK_SET);
+        rewind(DiscoActual);
+        fwrite(&mbr,sizeof(mbr),1,DiscoActual);
+        fclose(DiscoActual);
+
 
 
         }else{
-            printf("No existe el disco en el path indicado.");
+            printf("El tipo de ajuste debe ser BF, FF o WF.\n");
         }
+    }else{
+        printf("Las unidades deben estar en B, KB o MB.\n");
+    }
+
+}else{
+    printf("No existe el disco en el path indicado.\n");
+}
 
 
 
