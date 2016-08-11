@@ -8,6 +8,8 @@
 char Entrada[400];
 /**********************MÉTODOS****************************************************/
 void CrearDisco(int size,char*path,char*name);
+void CrearParticion(int size,char*path,char*name,char* unit,char* type,char* fit,char* Delete,char* add);
+
 /*********************************************************************************/
 
 /**********************STRUCTS****************************************************/
@@ -60,11 +62,12 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
             char *unit="";
             char *path="";
             char *name="";
+            char *aux="";
             //reconocer acá los parámetros del mkdisk
 
             temporal = completo;
 
-            temporal= strtok(NULL, " ::");
+            temporal= strtok(NULL, "::");
 
             //temporal= strtok(NULL, "::");//printf("After after %s\n",temporal);
 
@@ -80,12 +83,24 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
                 }else if(strcasecmp(temporal, "-path") ==0){
 
-                    temporal= strtok(NULL, " ");
+                    temporal= strtok(NULL, ":\"");
 
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    path = temporal;
+
+
+                path=temporal;
+
+                    //          path = temporal;
+
+
+                    //aux = strtok (NULL,"\"");
+
+                    /*if (aux[0] == ':'){
+                        memmove(aux, aux+1, strlen(aux));
+                    }*/
+                    //path = aux;
 
                 }else if(strcasecmp(temporal, "+unit") ==0){
 
@@ -163,7 +178,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
                 if(strcasecmp(temporal, "-path") ==0){
 
-                    temporal= strtok(NULL, " ");
+                    temporal= strtok(NULL, ":\"");
 
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
@@ -193,15 +208,14 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
         }else if(strcasecmp(completo, "fdisk") ==0){
 /**acá inicia el análisis del fdisk------------------------------------------------------------------------------*/
 
-            int Size=0;         //--------------
-            char *unit="";      //--------------
-            char *path="";      //--------------
-            char *type="";      //--------------
+            int Size=0;
+            char *unit="";
+            char *path="";
+            char *type="";
             char *fit="";
             char *Delete="";
-            char *name="";      //--------------
-            char *add="";
-            //reconocer acá los parámetros del mkdisk
+            char *name="";
+            int add="";
 
             temporal = completo;
 
@@ -221,7 +235,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
                 }else if(strcasecmp(temporal, "-path") ==0){
 
-                    temporal= strtok(NULL, " ");
+                    temporal= strtok(NULL, ":\"");
 
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
@@ -271,7 +285,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    unit = temporal;
+                    Delete = temporal;
 
                 }else if(strcasecmp(temporal, "+add") ==0){
 
@@ -280,14 +294,16 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
-                    unit = temporal;
+                    add = temporal;
 
                 }else{
                     printf("El parámetro %s no pertenece a fdisk.\n",temporal);
                 }
 
                     temporal = strtok(NULL, ":: \\");
-            }/**Acá debo ver lo del fdisk*/
+            }
+            /**Acá debo ver lo del fdisk*/
+
             if(Size != 0 && strcmp(path,"")!=0 && strcmp(name,"")!=0 ){
                 int SizeAnterior=Size;
                 if(Size<=0){
@@ -354,10 +370,6 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     }
                 }
 
-                if(strcmp(add,"")!=0){
-                }
-
-
             /**Se imprimen los parámetros de la partición*/
                 printf("Se creará una nueva partición:\n");
 
@@ -366,17 +378,11 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                 printf("\t-La ubicación del disco es: %s\n",path);
                 printf("\t-El nombre de la partición es: %s\n",name);
 
-            /**Se envían los parámetros al método para crear el disco*/
-                CrearDisco(Size,path,name);
-                /**Acá debo ver lo del fdisk*/
+            /**Se envían los parámetros al método para crear partición */
+                CrearParticion(Size,path,name,unit,type,fit,Delete,add);
             }else{
-                printf("No es posible crear el disco, faltan parámetros obligatorios\n");
+                printf("No es posible crear la partición, faltan parámetros obligatorios\n");
             }
-
-
-
-
-
 
         }else if(strcasecmp(completo, "mount") ==0){
         /**acá inicia el análisis del mount------------------------------------------------------------------------------*/
@@ -401,7 +407,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
                 if(strcasecmp(temporal, "-path") ==0){
 
-                    temporal= strtok(NULL, " ");
+                    temporal= strtok(NULL, ":\"");
 
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
@@ -464,7 +470,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
                 }else if(strcasecmp(temporal, "-path") ==0){
 
-                    temporal= strtok(NULL, " ");
+                    temporal= strtok(NULL, ":\"");
 
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
@@ -552,7 +558,14 @@ void CrearDisco(int Size,char*path,char*name){
 if(Size >= 10485760){
     char*nombre=strtok(name,"\"");
 
-    char*ruta=strtok(path,"\"");
+    char*ruta;
+    if(path[0]=="\""){
+    ruta=strtok(path,"\"");
+    }else{
+    ruta = path;
+    }
+
+
 
     char ValidarRuta[70]="mkdir -p ";
 
@@ -610,4 +623,25 @@ if(Size >= 10485760){
     printf("* Error: El tamaño mínimo del disco debe ser de 10MB.\n");
 }
 }
+
+
+void CrearParticion(int size,char*path,char*name,char* unit,char* type,char* fit,char* Delete,char* add){
+
+char*ruta=strtok(path,"\"");
+FILE * Disco = fopen(ruta, "r+b");
+
+        if(Disco != NULL) //Validar que el archivo exista
+        {
+
+
+        }else{
+            printf("No existe el disco en el path indicado.");
+        }
+
+
+
+}
+
+
+
 
