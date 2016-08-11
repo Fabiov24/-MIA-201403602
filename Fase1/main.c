@@ -47,6 +47,10 @@ struct EBR{
 
 /*********************************************************************************/
 
+/** Por no tener los structs arriba, esta declaración queda acá :(*/
+void ReporteMBR(struct MBR mabore);
+void ReporteDisk(struct MBR mabore);
+
 
 
 void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entrada
@@ -781,9 +785,6 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
         }else{
             printf("Esto no lo he validado todavía D: %i\n",add);
         }
-
-
-        //fseek(disco,0,SEEK_SET);
         rewind(DiscoActual);
         fwrite(&mbr,sizeof(mbr),1,DiscoActual);
         fclose(DiscoActual);
@@ -791,7 +792,7 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
 
 
         }else{
-            printf("El tipo de ajuste debe ser BF, FF o WF.\n");
+            printf("El tipo de ajuste debe ser BF, FF ó WF.\n");
         }
     }else{
         printf("Las unidades deben estar en B, KB o MB.\n");
@@ -800,10 +801,40 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
 }else{
     printf("No existe el disco en el path indicado.\n");
 }
+}
 
+void ReporteMBR(struct MBR mabore){
+    FILE *fp;
+ 	fp = fopen ( "MBR.dot", "w+" );
+    fprintf(fp," digraph {\n");
+
+    /** Acá debo recorrer el mbr para graficar la tabla con el estado de todas las particiones*/
+
+    fprintf(fp,"}\n");
+    fclose ( fp );
+    system("dot -Tpng MBR.dot -o mbr.png");
+    system("gnome-open mbr.png");
 
 
 }
+
+void ReporteDisk(struct MBR mabore){
+    FILE *fp;
+ 	fp = fopen ( "disk.dot", "w+" );
+    fprintf(fp," digraph {\n");
+
+    /** Acá debo recorrer el mbr para graficar las particiones del disco
+        - Tengo que agregar la llamada del reporte con el comando
+    */
+
+    fprintf(fp,"}\n");
+    fclose ( fp );
+    system("dot -Tpng disk.dot -o disk.png");
+    system("gnome-open disk.png");
+
+
+}
+
 
 
 
