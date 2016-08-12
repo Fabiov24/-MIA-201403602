@@ -9,7 +9,7 @@ char Entrada[400];
 /**********************MÉTODOS****************************************************/
 void CrearDisco(int size,char*path,char*name);
 void CrearParticion(int size,char path[],char name[],char unit[],char type[],char fit[],char Delete[],int add);
-
+int GetWidth(int ValorParticionActual, int ValorTotal);
 /*********************************************************************************/
 
 /**********************STRUCTS****************************************************/
@@ -48,8 +48,8 @@ struct EBR{
 /*********************************************************************************/
 
 /** Por no tener los structs arriba, esta declaración queda acá :(*/
-void ReporteMBR(struct MBR mabore);
-void ReporteDisk(struct MBR mabore);
+void ReporteMBR(struct MBR mabore,char*ruta);
+void ReporteDisk(struct MBR mabore,char*ruta);
 
 
 
@@ -788,7 +788,8 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
         rewind(DiscoActual);
         fwrite(&mbr,sizeof(mbr),1,DiscoActual);
         fclose(DiscoActual);
-        ReporteMBR(mbr);
+        ReporteMBR(mbr, path);
+        ReporteDisk(mbr, path);
 
 
         }else{
@@ -803,52 +804,52 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
 }
 }
 
-void ReporteMBR(struct MBR mabore){
+void ReporteMBR(struct MBR mabore, char* ruta){
     FILE *fp;
  	fp = fopen ( "MBR.dot", "w+" );
     fprintf(fp," digraph {\n");
 
 
-    fprintf(fp,"label=<<B>Master Boot Record </B>>;\n");
+    fprintf(fp,"label=<<B>Master Boot Record: %s</B>>;\n",ruta);
     fprintf(fp,"fontsize=17;");
     fprintf(fp,"node [shape=plaintext fontname = \"Ubuntu\"];\n");
     fprintf(fp,"node [shape=plaintext fontname = \"Ubuntu\"];\n");
     fprintf(fp,"graph [fontname = \"Ubuntu\"];\n");
 
     fprintf(fp,"MBR [label=<<table border=\"1\" cellborder=\"1\" cellspacing=\"0\">\n");
-    fprintf(fp,"<tr><td bgcolor=\"#DB351B\"><b>Nombre</b></td><td bgcolor=\"#DB351B\"><b>Valor</b></td></tr> \n");
+    fprintf(fp,"<tr><td bgcolor=\"#033670\"><b>Nombre</b></td><td bgcolor=\"#033670\"><b>Valor</b></td></tr> \n");
 
-    fprintf(fp,"<tr><td><b>mbr_tamaño</b></td><td>%i</td></tr>\n",mabore.mbr_tamano);
-    fprintf(fp,"<tr><td><b>mbr_fecha_creacion</b></td><td>%s</td></tr>\n",mabore.mbr_fecha_creacion);
-    fprintf(fp,"<tr><td><b>mbr_disk_signature</b></td><td>%i</td></tr>\n",mabore.mbr_disk_signature);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>mbr_tamaño</b></td><td>%i</td></tr>\n",mabore.mbr_tamano);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>mbr_fecha_creacion</b></td><td>%s</td></tr>\n",mabore.mbr_fecha_creacion);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>mbr_disk_signature</b></td><td>%i</td></tr>\n",mabore.mbr_disk_signature);
 
-    fprintf(fp,"<tr><td><b>part_status_1</b></td><td>%s</td></tr>\n",mabore.mbr_part_1.part_status);
-    fprintf(fp,"<tr><td><b>part_type_1</b></td><td>%c</td></tr>\n",mabore.mbr_part_1.part_type);
-    fprintf(fp,"<tr><td><b>part_fit_1</b></td><td>%c</td></tr>\n",mabore.mbr_part_1.part_fit);
-    fprintf(fp,"<tr><td><b>part_start_1</b></td><td>%i</td></tr>\n",mabore.mbr_part_1.part_start);
-    fprintf(fp,"<tr><td><b>part_size_1</b></td><td>%i</td></tr>\n",mabore.mbr_part_1.part_size);
-    fprintf(fp,"<tr><td><b>part_name_1</b></td><td>%s</td></tr>\n",mabore.mbr_part_1.part_name);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_status_1</b></td><td>%s</td></tr>\n",mabore.mbr_part_1.part_status);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_type_1</b></td><td>%c</td></tr>\n",mabore.mbr_part_1.part_type);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_fit_1</b></td><td>%c</td></tr>\n",mabore.mbr_part_1.part_fit);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_start_1</b></td><td>%i</td></tr>\n",mabore.mbr_part_1.part_start);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_size_1</b></td><td>%i</td></tr>\n",mabore.mbr_part_1.part_size);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_name_1</b></td><td>%s</td></tr>\n",mabore.mbr_part_1.part_name);
 
-	fprintf(fp,"<tr><td><b>part_status_2</b></td><td>%s</td></tr>\n",mabore.mbr_part_2.part_status);
-    fprintf(fp,"<tr><td><b>part_type_2</b></td><td>%c</td></tr>\n",mabore.mbr_part_2.part_type);
-    fprintf(fp,"<tr><td><b>part_fit_2</b></td><td>%c</td></tr>\n",mabore.mbr_part_2.part_fit);
-    fprintf(fp,"<tr><td><b>part_start_2</b></td><td>%i</td></tr>\n",mabore.mbr_part_2.part_start);
-    fprintf(fp,"<tr><td><b>part_size_2</b></td><td>%i</td></tr>\n",mabore.mbr_part_2.part_size);
-    fprintf(fp,"<tr><td><b>part_name_2</b></td><td>%s</td></tr>\n",mabore.mbr_part_2.part_name);
+	fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_status_2</b></td><td>%s</td></tr>\n",mabore.mbr_part_2.part_status);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_type_2</b></td><td>%c</td></tr>\n",mabore.mbr_part_2.part_type);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_fit_2</b></td><td>%c</td></tr>\n",mabore.mbr_part_2.part_fit);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_start_2</b></td><td>%i</td></tr>\n",mabore.mbr_part_2.part_start);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_size_2</b></td><td>%i</td></tr>\n",mabore.mbr_part_2.part_size);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_name_2</b></td><td>%s</td></tr>\n",mabore.mbr_part_2.part_name);
 
-	fprintf(fp,"<tr><td><b>part_status_3</b></td><td>%s</td></tr>\n",mabore.mbr_part_3.part_status);
-    fprintf(fp,"<tr><td><b>part_type_3</b></td><td>%c</td></tr>\n",mabore.mbr_part_3.part_type);
-    fprintf(fp,"<tr><td><b>part_fit_3</b></td><td>%c</td></tr>\n",mabore.mbr_part_3.part_fit);
-    fprintf(fp,"<tr><td><b>part_start_3</b></td><td>%i</td></tr>\n",mabore.mbr_part_3.part_start);
-    fprintf(fp,"<tr><td><b>part_size_3</b></td><td>%i</td></tr>\n",mabore.mbr_part_3.part_size);
-    fprintf(fp,"<tr><td><b>part_name_3</b></td><td>%s</td></tr>\n",mabore.mbr_part_3.part_name);
+	fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_status_3</b></td><td>%s</td></tr>\n",mabore.mbr_part_3.part_status);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_type_3</b></td><td>%c</td></tr>\n",mabore.mbr_part_3.part_type);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_fit_3</b></td><td>%c</td></tr>\n",mabore.mbr_part_3.part_fit);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_start_3</b></td><td>%i</td></tr>\n",mabore.mbr_part_3.part_start);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_size_3</b></td><td>%i</td></tr>\n",mabore.mbr_part_3.part_size);
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_name_3</b></td><td>%s</td></tr>\n",mabore.mbr_part_3.part_name);
 
-    fprintf(fp,"<tr><td><b>part_status_4</b></td><td>%s</td></tr>\n",mabore.mbr_part_4.part_status);
-    fprintf(fp,"<tr><td><b>part_type_4</b></td><td>%c</td></tr>\n",mabore.mbr_part_4.part_type);
-    fprintf(fp,"<tr><td><b>part_fit_4</b></td><td>%c</td></tr>\n",mabore.mbr_part_4.part_fit);
-    fprintf(fp,"<tr><td><b>part_start_4</b></td><td>%i</td></tr>\n",mabore.mbr_part_4.part_start);
-    fprintf(fp,"<tr><td><b>part_size_4</b></td><td>%i</td></tr>\n",mabore.mbr_part_4.part_size);
-    fprintf(fp,"<tr><td><b>part_name_4</b></td><td>%s</td></tr>\n",mabore.mbr_part_4.part_name);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_status_4</b></td><td>%s</td></tr>\n",mabore.mbr_part_4.part_status);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_type_4</b></td><td>%c</td></tr>\n",mabore.mbr_part_4.part_type);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_fit_4</b></td><td>%c</td></tr>\n",mabore.mbr_part_4.part_fit);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_start_4</b></td><td>%i</td></tr>\n",mabore.mbr_part_4.part_start);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_size_4</b></td><td>%i</td></tr>\n",mabore.mbr_part_4.part_size);
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_name_4</b></td><td>%s</td></tr>\n",mabore.mbr_part_4.part_name);
 
     fprintf(fp,"</table>>];}\n");
     fclose ( fp );
@@ -859,21 +860,120 @@ void ReporteMBR(struct MBR mabore){
 
 }
 
-void ReporteDisk(struct MBR mabore){
+void ReporteDisk(struct MBR mabore,char*ruta){
     FILE *fp;
  	fp = fopen ( "disk.dot", "w+" );
     fprintf(fp," digraph {\n");
 
-    /** Acá debo recorrer el mbr para graficar las particiones del disco
-        - Tengo que agregar la llamada del reporte con el comando
-    */
+    fprintf(fp,"label=<<B>%s</B>>;\n",ruta);
+    fprintf(fp,"fontsize=17;");
+    fprintf(fp,"node [shape=plaintext fontname = \"Ubuntu\"];\n");
+    fprintf(fp,"node [shape=plaintext fontname = \"Ubuntu\"];\n");
+    fprintf(fp,"graph [fontname = \"Ubuntu\"];\n");
 
+    fprintf(fp,"b [label=<");
+    fprintf(fp,"<TABLE BGCOLOR=\"#76B0FF\">");
+    fprintf(fp,"<TR>");
+    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#103C78\" BORDER=\"2\" WIDTH=\"%i\"><b>MBR</b></TD>", GetWidth(sizeof(mabore),mabore.mbr_tamano));
+
+        if((strcmp(mabore.mbr_part_1.part_status,"empty")==0) && (strcmp(mabore.mbr_part_2.part_status,"empty")==0) && (strcmp(mabore.mbr_part_3.part_status,"empty")==0 )&& (strcmp(mabore.mbr_part_4.part_status,"empty")==0 )){
+                fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\" COLSPAN=\"3\" ALIGN=\"center\" PORT=\"there\"><b>Libre</b></TD>");
+        }else{
+
+            if(strcmp(mabore.mbr_part_1.part_status,"empty")==0){
+                fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\"><b>Libre</b></TD>");
+            }else{
+
+
+                if(mabore.mbr_part_1.part_type == 'P'){
+                    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#784810\" BORDER=\"2\" WIDTH=\"%i\"><b>Primaria</b></TD>",GetWidth(mabore.mbr_part_1.part_size, mabore.mbr_tamano));
+
+                }else{
+                /** Esto va a cambiar cuando ya tenga las lógicas*/
+
+                    fprintf(fp,"<TD><TABLE BGCOLOR=\"#E0F310\" BORDER=\"2\"><TR>");
+                    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\"><b>Libre</b></TD>");
+                    fprintf(fp,"</TR>");
+                }
+            }
+
+            if(strcmp(mabore.mbr_part_2.part_status,"empty")==0){
+                fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\"><b>Libre</b></TD>");
+            }else{
+
+
+                if(mabore.mbr_part_2.part_type == 'P'){
+                    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#784810\" BORDER=\"2\" WIDTH=\"%i\"><b>Primaria</b></TD>",GetWidth(mabore.mbr_part_2.part_size, mabore.mbr_tamano));
+
+                }else{
+                /** Esto va a cambiar cuando ya tenga las lógicas*/
+
+                    fprintf(fp,"<TD><TABLE BGCOLOR=\"#E0F310\" BORDER=\"2\"><TR>");
+                    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\"><b>Libre</b></TD>");
+                    fprintf(fp,"</TR>");
+                }
+            }
+
+
+            if(strcmp(mabore.mbr_part_3.part_status,"empty")==0){
+                fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\"><b>Libre</b></TD>");
+            }else{
+
+
+                if(mabore.mbr_part_3.part_type == 'P'){
+                    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#784810\" BORDER=\"2\" WIDTH=\"%i\"><b>Primaria</b></TD>",GetWidth(mabore.mbr_part_3.part_size, mabore.mbr_tamano));
+
+                }else{
+                /** Esto va a cambiar cuando ya tenga las lógicas*/
+
+                    fprintf(fp,"<TD><TABLE BGCOLOR=\"#E0F310\" BORDER=\"2\"><TR>");
+                    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\"><b>Libre</b></TD>");
+                    fprintf(fp,"</TR>");
+                }
+            }
+
+
+            if(strcmp(mabore.mbr_part_4.part_status,"empty")==0){
+                fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\"><b>Libre</b></TD>");
+            }else{
+
+
+                if(mabore.mbr_part_4.part_type == 'P'){
+                    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#784810\" BORDER=\"2\" WIDTH=\"%i\"><b>Primaria</b></TD>",GetWidth(mabore.mbr_part_4.part_size, mabore.mbr_tamano));
+
+                }else{
+                /** Esto va a cambiar cuando ya tenga las lógicas*/
+
+                    fprintf(fp,"<TD><TABLE BGCOLOR=\"#E0F310\" BORDER=\"2\"><TR>");
+                    fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\"><b>Libre</b></TD>");
+                    fprintf(fp,"</TR>");
+                }
+            }
+
+
+            }
+
+
+
+    fprintf(fp,"</TR>");
+    fprintf(fp,"</TABLE>>];");
     fprintf(fp,"}\n");
     fclose ( fp );
     system("dot -Tpng disk.dot -o disk.png");
     system("gnome-open disk.png");
 
 
+    /** Acá debo recorrer el mbr para graficar las particiones del disco
+        - Tengo que agregar la llamada del reporte con el comando
+        - revisar que las particiones no se llamen igual D:
+        - Crear las extendidas
+    */
+
+
+}
+
+int GetWidth(int ValorParticionActual, int ValorTotal){
+    return ((ValorParticionActual * 60000) /ValorTotal );
 }
 
 
