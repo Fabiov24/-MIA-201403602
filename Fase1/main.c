@@ -788,7 +788,7 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
         rewind(DiscoActual);
         fwrite(&mbr,sizeof(mbr),1,DiscoActual);
         fclose(DiscoActual);
-
+        ReporteMBR(mbr);
 
 
         }else{
@@ -808,10 +808,51 @@ void ReporteMBR(struct MBR mabore){
  	fp = fopen ( "MBR.dot", "w+" );
     fprintf(fp," digraph {\n");
 
-    /** Acá debo recorrer el mbr para graficar la tabla con el estado de todas las particiones*/
 
-    fprintf(fp,"}\n");
+    fprintf(fp,"label=<<B>Master Boot Record </B>>;\n");
+    fprintf(fp,"fontsize=17;");
+    fprintf(fp,"node [shape=plaintext fontname = \"Ubuntu\"];\n");
+    fprintf(fp,"node [shape=plaintext fontname = \"Ubuntu\"];\n");
+    fprintf(fp,"graph [fontname = \"Ubuntu\"];\n");
+
+    fprintf(fp,"MBR [label=<<table border=\"1\" cellborder=\"1\" cellspacing=\"0\">\n");
+    fprintf(fp,"<tr><td bgcolor=\"#DB351B\"><b>Nombre</b></td><td bgcolor=\"#DB351B\"><b>Valor</b></td></tr> \n");
+
+    fprintf(fp,"<tr><td><b>mbr_tamaño</b></td><td>%i</td></tr>\n",mabore.mbr_tamano);
+    fprintf(fp,"<tr><td><b>mbr_fecha_creacion</b></td><td>%s</td></tr>\n",mabore.mbr_fecha_creacion);
+    fprintf(fp,"<tr><td><b>mbr_disk_signature</b></td><td>%i</td></tr>\n",mabore.mbr_disk_signature);
+
+    fprintf(fp,"<tr><td><b>part_status_1</b></td><td>%s</td></tr>\n",mabore.mbr_part_1.part_status);
+    fprintf(fp,"<tr><td><b>part_type_1</b></td><td>%c</td></tr>\n",mabore.mbr_part_1.part_type);
+    fprintf(fp,"<tr><td><b>part_fit_1</b></td><td>%c</td></tr>\n",mabore.mbr_part_1.part_fit);
+    fprintf(fp,"<tr><td><b>part_start_1</b></td><td>%i</td></tr>\n",mabore.mbr_part_1.part_start);
+    fprintf(fp,"<tr><td><b>part_size_1</b></td><td>%i</td></tr>\n",mabore.mbr_part_1.part_size);
+    fprintf(fp,"<tr><td><b>part_name_1</b></td><td>%s</td></tr>\n",mabore.mbr_part_1.part_name);
+
+	fprintf(fp,"<tr><td><b>part_status_2</b></td><td>%s</td></tr>\n",mabore.mbr_part_2.part_status);
+    fprintf(fp,"<tr><td><b>part_type_2</b></td><td>%c</td></tr>\n",mabore.mbr_part_2.part_type);
+    fprintf(fp,"<tr><td><b>part_fit_2</b></td><td>%c</td></tr>\n",mabore.mbr_part_2.part_fit);
+    fprintf(fp,"<tr><td><b>part_start_2</b></td><td>%i</td></tr>\n",mabore.mbr_part_2.part_start);
+    fprintf(fp,"<tr><td><b>part_size_2</b></td><td>%i</td></tr>\n",mabore.mbr_part_2.part_size);
+    fprintf(fp,"<tr><td><b>part_name_2</b></td><td>%s</td></tr>\n",mabore.mbr_part_2.part_name);
+
+	fprintf(fp,"<tr><td><b>part_status_3</b></td><td>%s</td></tr>\n",mabore.mbr_part_3.part_status);
+    fprintf(fp,"<tr><td><b>part_type_3</b></td><td>%c</td></tr>\n",mabore.mbr_part_3.part_type);
+    fprintf(fp,"<tr><td><b>part_fit_3</b></td><td>%c</td></tr>\n",mabore.mbr_part_3.part_fit);
+    fprintf(fp,"<tr><td><b>part_start_3</b></td><td>%i</td></tr>\n",mabore.mbr_part_3.part_start);
+    fprintf(fp,"<tr><td><b>part_size_3</b></td><td>%i</td></tr>\n",mabore.mbr_part_3.part_size);
+    fprintf(fp,"<tr><td><b>part_name_3</b></td><td>%s</td></tr>\n",mabore.mbr_part_3.part_name);
+
+    fprintf(fp,"<tr><td><b>part_status_4</b></td><td>%s</td></tr>\n",mabore.mbr_part_4.part_status);
+    fprintf(fp,"<tr><td><b>part_type_4</b></td><td>%c</td></tr>\n",mabore.mbr_part_4.part_type);
+    fprintf(fp,"<tr><td><b>part_fit_4</b></td><td>%c</td></tr>\n",mabore.mbr_part_4.part_fit);
+    fprintf(fp,"<tr><td><b>part_start_4</b></td><td>%i</td></tr>\n",mabore.mbr_part_4.part_start);
+    fprintf(fp,"<tr><td><b>part_size_4</b></td><td>%i</td></tr>\n",mabore.mbr_part_4.part_size);
+    fprintf(fp,"<tr><td><b>part_name_4</b></td><td>%s</td></tr>\n",mabore.mbr_part_4.part_name);
+
+    fprintf(fp,"</table>>];}\n");
     fclose ( fp );
+
     system("dot -Tpng MBR.dot -o mbr.png");
     system("gnome-open mbr.png");
 
