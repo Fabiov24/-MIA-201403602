@@ -5,14 +5,24 @@
 #include <time.h>
 
 /**********************VARIABLES**************************************************/
+
 char Entrada[400];
+char Particiones[30][30][400] = {""};
+char Abecedario[26] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+int DiscosMontados=0;
+
 /**********************MÉTODOS****************************************************/
+
+int GetWidth(int ValorParticionActual, int ValorTotal);
 void CrearDisco(int size,char*path,char*name);
 void CrearParticion(int size,char path[],char name[],char unit[],char type[],char fit[],char Delete[],int add);
-int GetWidth(int ValorParticionActual, int ValorTotal);
+void MontarParticion(char*path,char*name);
+void AsignacionID(char*path,char*nombre);
+
 /*********************************************************************************/
 
 /**********************STRUCTS****************************************************/
+
 struct Particion{
 	char part_status[10];
 	char part_type;
@@ -50,7 +60,6 @@ struct EBR{
 /** Por no tener los structs arriba, esta declaración queda acá :(*/
 void ReporteMBR(struct MBR mabore,char*ruta);
 void ReporteDisk(struct MBR mabore,char*ruta);
-
 
 
 void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entrada
@@ -206,6 +215,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     }else{
                         printf("Debe ingresar una ruta de un disco existente.\n");
                     }
+            }else{
+                printf("Faltan parámetros obligatorios.\n");
             }
 
 
@@ -413,6 +424,58 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
         /**acá inicia el análisis del mount------------------------------------------------------------------------------*/
 
 
+            char ruta[100];
+            char name[100];
+
+            temporal = completo;
+
+            temporal= strtok(NULL, " ::");
+
+            //temporal= strtok(NULL, "::"); printf("After after %s\n",temporal);
+
+            while(temporal != NULL){
+
+                if(strcasecmp(temporal, "-path") ==0){
+
+                    temporal= strtok(NULL, ":\"");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    strcpy(ruta,temporal);
+                }else if(strcasecmp(temporal, "-name") ==0){
+
+                    temporal= strtok(NULL, ":\"");
+
+                    if (temporal[0] == ':'){
+                        memmove(temporal, temporal+1, strlen(temporal));
+                    }
+                    strcpy(name,temporal);
+                }else{
+                    printf("El parámetro %s no pertenece al comando mount.\n",temporal);
+                }
+
+                    temporal = strtok(NULL, ":: \\");
+            }
+
+            if(strcmp(ruta,"")!=0 && strcmp(name,"")!=0){
+                printf("Se montará la partición:\n");
+                char*nombre=strtok(ruta,"\"");
+                printf("\t-La ubicación del disco es: \"%s\"\n",nombre);
+                printf("\t-El nombre del disco es: \"%s\"\n",name);
+                FILE* Fichero;
+
+                printf("Montando partición...\n");
+
+                MontarParticion(ruta,name);
+
+
+            }else{
+                printf("Faltan parámetros obligatorios.\n");
+            }
+
+
+
         }else if(strcasecmp(completo, "umount") ==0){
         /**acá inicia el análisis del umount-----------------------------------------------------------------------------*/
 
@@ -579,7 +642,7 @@ int main(){
 void CrearDisco(int Size,char*path,char*name){
     FILE  *Fichero;
     int ContadorCeros=0;
-    printf("\nCreando disco...\n");
+    printf("\nCreando disco... %s\n",path);
 
 if(Size >= 10485760){
     char*nombre=strtok(name,"\"");
@@ -587,8 +650,10 @@ if(Size >= 10485760){
     char*ruta;
     if(path[0]=="\""){
     ruta=strtok(path,"\"");
+    //strcpy(ruta,strtok(path,"\""));
     }else{
     ruta = path;
+    //strcpy(ruta,path);
     }
 
 
@@ -611,7 +676,7 @@ if(Size >= 10485760){
 
         mabore.mbr_tamano = Size;
 
-        strftime(TiempoActual,128,"%d/%m/%y %H:%M:%S\n",tlocal);
+        strftime(TiempoActual,128,"%d/%m/%y - %H:%M:%S\n",tlocal);
         printf("%s", TiempoActual);
         strcpy(mabore.mbr_fecha_creacion,TiempoActual);
 
@@ -669,6 +734,7 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
 
         if((strcmp(Delete,"") == 0) && (add == 0)) { //cuando cumple esto es porque va a crear una partición  :v
             if(Size>=2048){
+                if(strcmp(nombre,mbr.mbr_part_1.part_name) != 0 && strcmp(nombre,mbr.mbr_part_2.part_name) != 0  && strcmp(nombre,mbr.mbr_part_3.part_name) != 0 && strcmp(nombre,mbr.mbr_part_4.part_name) != 0){
 
                 if(strcmp(type,"") == 0 || strcmp(type,"p") == 0 ){
 
@@ -688,7 +754,7 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
                                     mbr.mbr_part_1.part_type = 'P';
                                     mbr.mbr_part_1.part_fit = fit[0];
 
-                                    printf("Se creó la partición primaria %s exitosamente, en la posición 1.\n", name);
+                                    printf("Se creó la partición primaria \"%s\" exitosamente, en la posición 1.\n", nombre);
 
                             }else{
                                   printf("No fue posible crear la partición, no queda espacio disponible.\n");
@@ -710,7 +776,7 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
                                     mbr.mbr_part_2.part_type = 'P';
                                     mbr.mbr_part_2.part_fit = fit[0];
 
-                                    printf("Se creó la partición primaria %s exitosamente, en la posición 2.\n", name);
+                                    printf("Se creó la partición primaria \"%s\" exitosamente, en la posición 2.\n", nombre);
 
                             }else{
                                   printf("No fue posible crear la partición, no queda espacio disponible.\n");
@@ -733,7 +799,7 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
                                     mbr.mbr_part_3.part_type = 'P';
                                     mbr.mbr_part_3.part_fit = fit[0];
 
-                                    printf("Se creó la partición primaria %s exitosamente, en la posición 3.\n", name);
+                                    printf("Se creó la partición primaria \"%s\" exitosamente, en la posición 3.\n", nombre);
 
                             }else{
                                   printf("No fue posible crear la partición, no queda espacio disponible.\n");
@@ -757,7 +823,7 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
                                     mbr.mbr_part_4.part_type = 'P';
                                     mbr.mbr_part_4.part_fit = fit[0];
 
-                                    printf("Se creó la partición primaria %s exitosamente, en la posición 4.\n", name);
+                                    printf("Se creó la partición primaria \"%s\" exitosamente, en la posición 4.\n", nombre);
 
                             }else{
                                   printf("No fue posible crear la partición, no queda espacio disponible.\n");
@@ -776,11 +842,17 @@ if(DiscoActual != NULL){ //Validar que el archivo exista
                 }else if(strcmp(type,"e") == 0){
 
                 }
-
+                else if(strcmp(type,"l") == 0){
+                    /**particiones lógicas D:*/
+                }
+            }else{
+                printf("No es posible crear la partición, ya existe una con el nombre %s.\n",name);
+            }
 
             }else{
                 printf("Error, el tamaño mínimo de una partición debe ser de 2MB.\n");
             }
+
 
         }else{
             printf("Esto no lo he validado todavía D: %i\n",add);
@@ -823,26 +895,55 @@ void ReporteMBR(struct MBR mabore, char* ruta){
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>mbr_fecha_creacion</b></td><td>%s</td></tr>\n",mabore.mbr_fecha_creacion);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>mbr_disk_signature</b></td><td>%i</td></tr>\n",mabore.mbr_disk_signature);
 
+    if(strcasecmp(mabore.mbr_part_1.part_status,"empty")!=0){
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_status_1</b></td><td>%s</td></tr>\n",mabore.mbr_part_1.part_status);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_type_1</b></td><td>%c</td></tr>\n",mabore.mbr_part_1.part_type);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_fit_1</b></td><td>%c</td></tr>\n",mabore.mbr_part_1.part_fit);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_start_1</b></td><td>%i</td></tr>\n",mabore.mbr_part_1.part_start);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_size_1</b></td><td>%i</td></tr>\n",mabore.mbr_part_1.part_size);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_name_1</b></td><td>%s</td></tr>\n",mabore.mbr_part_1.part_name);
+    }else{
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_status_1</b></td><td>Empty</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_type_1</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_fit_1</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_start_1</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_size_1</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_name_1</b></td><td>--</td></tr>\n");
+    }
 
+    if(strcasecmp(mabore.mbr_part_2.part_status,"empty")!=0){
 	fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_status_2</b></td><td>%s</td></tr>\n",mabore.mbr_part_2.part_status);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_type_2</b></td><td>%c</td></tr>\n",mabore.mbr_part_2.part_type);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_fit_2</b></td><td>%c</td></tr>\n",mabore.mbr_part_2.part_fit);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_start_2</b></td><td>%i</td></tr>\n",mabore.mbr_part_2.part_start);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_size_2</b></td><td>%i</td></tr>\n",mabore.mbr_part_2.part_size);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_name_2</b></td><td>%s</td></tr>\n",mabore.mbr_part_2.part_name);
+    }else{
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_status_2</b></td><td>Empty</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_type_2</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_fit_2</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_start_2</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_size_2</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_name_2</b></td><td>--</td></tr>\n");
+    }
 
+    if(strcasecmp(mabore.mbr_part_3.part_status,"empty")!=0){
 	fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_status_3</b></td><td>%s</td></tr>\n",mabore.mbr_part_3.part_status);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_type_3</b></td><td>%c</td></tr>\n",mabore.mbr_part_3.part_type);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_fit_3</b></td><td>%c</td></tr>\n",mabore.mbr_part_3.part_fit);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_start_3</b></td><td>%i</td></tr>\n",mabore.mbr_part_3.part_start);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_size_3</b></td><td>%i</td></tr>\n",mabore.mbr_part_3.part_size);
     fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_name_3</b></td><td>%s</td></tr>\n",mabore.mbr_part_3.part_name);
+    }else{
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_status_3</b></td><td>Empty</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_type_3</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_fit_3</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_start_3</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_size_3</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#275EA6\"><b>part_name_3</b></td><td>--</td></tr>\n");
+    }
+
+    if(strcasecmp(mabore.mbr_part_4.part_status,"empty")!=0){
 
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_status_4</b></td><td>%s</td></tr>\n",mabore.mbr_part_4.part_status);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_type_4</b></td><td>%c</td></tr>\n",mabore.mbr_part_4.part_type);
@@ -850,7 +951,14 @@ void ReporteMBR(struct MBR mabore, char* ruta){
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_start_4</b></td><td>%i</td></tr>\n",mabore.mbr_part_4.part_start);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_size_4</b></td><td>%i</td></tr>\n",mabore.mbr_part_4.part_size);
     fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_name_4</b></td><td>%s</td></tr>\n",mabore.mbr_part_4.part_name);
-
+    }else{
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_status_4</b></td><td>Empty</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_type_4</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_fit_4</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_start_4</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_size_4</b></td><td>--</td></tr>\n");
+    fprintf(fp,"<tr><td bgcolor=\"#9BC4F3\"><b>part_name_4</b></td><td>--</td></tr>\n");
+    }
     fprintf(fp,"</table>>];}\n");
     fclose ( fp );
 
@@ -962,10 +1070,8 @@ void ReporteDisk(struct MBR mabore,char*ruta){
     system("dot -Tpng disk.dot -o disk.png");
     system("gnome-open disk.png");
 
-
     /** Acá debo recorrer el mbr para graficar las particiones del disco
         - Tengo que agregar la llamada del reporte con el comando
-        - revisar que las particiones no se llamen igual D:
         - Crear las extendidas
     */
 
@@ -974,6 +1080,92 @@ void ReporteDisk(struct MBR mabore,char*ruta){
 
 int GetWidth(int ValorParticionActual, int ValorTotal){
     return ((ValorParticionActual * 60000) /ValorTotal );
+}
+
+void MontarParticion(char*path,char*name){
+
+    char*ruta = strtok(path,"\"");
+    char*nombre= strtok(name,"\"");
+    FILE * DiscoActual = fopen(ruta, "r+b");
+
+
+    if(DiscoActual != NULL){
+    struct MBR mbr;
+    fread (&mbr, sizeof(mbr), 1,DiscoActual);
+    fclose(DiscoActual);
+
+
+    if(strcmp(mbr.mbr_part_1.part_name, nombre) == 0){
+        AsignacionID(path,nombre);
+
+    }
+    else if(strcmp(mbr.mbr_part_2.part_name, nombre) == 0){
+        AsignacionID(path,nombre);
+    }
+    else if(strcmp(mbr.mbr_part_3.part_name, nombre) == 0){
+        AsignacionID(path,nombre);
+    }
+    else if(strcmp(mbr.mbr_part_4.part_name, nombre) == 0){
+        AsignacionID(path,nombre);
+    }
+    else{
+        printf("No existe la partición indicada.\n");
+    }
+
+
+    }else{
+        printf("El disco indicado no existe.\n");
+    }
+
+
+}
+
+void AsignacionID(char* path, char*nombre){
+    int ContadorDiscos=0;
+    int PosicionParticion=1;
+    int PosicionVertical=1;
+    int ParticionExiste=0;
+    char ID[8];
+
+
+    if(DiscosMontados<30){
+        while(ContadorDiscos<30){
+            if((strcmp(Particiones[ContadorDiscos][0] ,path)==0)||(strcmp(Particiones[DiscosMontados][0] ,"")==0)){
+                strcpy(Particiones[ContadorDiscos][0],path);
+
+                while (strcmp(Particiones[ContadorDiscos][PosicionParticion] ,"")!=0 && strcmp(Particiones[ContadorDiscos][PosicionParticion] ,nombre)!=0){
+                    PosicionParticion++;
+                }
+                while(PosicionVertical<30){
+
+                    if(strcmp(Particiones[ContadorDiscos][PosicionVertical] ,nombre) == 0){
+                        ParticionExiste=1;
+                    }
+                     PosicionVertical++;
+                }
+
+                if(ParticionExiste==0){
+                    strcpy(Particiones[ContadorDiscos][PosicionParticion] ,nombre);
+                    char temporal[10];
+                    sprintf(temporal,"vd%c%i",Abecedario[ContadorDiscos], PosicionParticion);
+                    strcpy(ID, temporal);
+                    printf("Se montó la partición con éxito, el ID asignado es:%s\n", ID);
+                    break;
+
+                }else{
+                    printf("Error, la partición fue montada.\n");
+                    break;
+                }
+            }
+
+            ContadorDiscos++;
+        }
+
+
+    }else{
+        printf("No es posible almacenar más particiones, ya se almacenó el máximo disponible.\n");
+    }
+
 }
 
 
