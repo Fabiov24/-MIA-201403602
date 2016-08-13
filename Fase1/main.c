@@ -8,7 +8,7 @@
 
 char Entrada[400];
 char Particiones[30][30][400] = {""};
-char Abecedario[26] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
+char Abecedario[26] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','\0'};
 int DiscosMontados=0;
 
 /**********************MÉTODOS****************************************************/
@@ -18,6 +18,7 @@ void CrearDisco(int size,char*path,char*name);
 void CrearParticion(int size,char path[],char name[],char unit[],char type[],char fit[],char Delete[],int add);
 void MontarParticion(char*path,char*name);
 void AsignacionID(char*path,char*nombre);
+void Reporte(char*path,char*name, char*id);
 
 /*********************************************************************************/
 
@@ -150,6 +151,8 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                         Size = Size * 1024;
                     }else if(strcasecmp(unit,"m")==0){
                         Size = Size * 1024*1024;
+                    }else{
+                        Size=0;
                     }
                 }else{
                     unit = "M";
@@ -422,8 +425,6 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
 
         }else if(strcasecmp(completo, "mount") ==0){
         /**acá inicia el análisis del mount------------------------------------------------------------------------------*/
-
-
             char ruta[100];
             char name[100];
 
@@ -538,7 +539,6 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
             char *name="";
             char *path="";
             char *id="";
-            char *ruta="";
             //reconocer acá los parámetros del rep
 
             temporal = completo;
@@ -554,6 +554,7 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     if (temporal[0] == ':'){
                         memmove(temporal, temporal+1, strlen(temporal));
                     }
+
                     name=temporal;
 
                 }else if(strcasecmp(temporal, "-path") ==0){
@@ -574,21 +575,16 @@ void AnalizarEntrada(char Texto[]){ //método para analizar los comandos de entr
                     }
                     id = temporal;
 
-                }else if(strcasecmp(temporal, "+ruta") ==0){
-
-                    temporal= strtok(NULL, " ");
-
-                    if (temporal[0] == ':'){
-                        memmove(temporal, temporal+1, strlen(temporal));
-                    }
-                    ruta = temporal;
-
                 }else if(strcasecmp(temporal,"\n")==0){
                 }else{
                     printf("El parámetro %s no pertenece a rep.\n",temporal);
                 }
 
                     temporal = strtok(NULL, ":: \\");
+            }
+
+            if(strcasecmp(name,"")!=0 &&strcasecmp(path,"")!=0 &&strcasecmp(id,"")!=0 ){
+            Reporte(path,name,id);
             }
 
 
@@ -630,6 +626,34 @@ int main(){
         }else if(strcasecmp(Entrada,"clear")==0){
             system("clear");
         }else if(strcasecmp(Entrada,"\n")==0){
+        }else if(strlen(Entrada)==5 && strcasecmp(Entrada,"mount")==0){
+            /**------recorrer las montadas D:------------------------------*/
+    int PunteroDisco = 0;
+    int PunteroParticion = 1;
+    int ExistenParticiones = 0;
+
+    while(PunteroDisco<30){
+        if(strcmp(Particiones[PunteroDisco][0], "") != 0){
+            while(PunteroParticion<30){
+                if(strcmp(Particiones[PunteroDisco][PunteroParticion], "") != 0){
+                    ExistenParticiones = 1;
+                   printf("\t-Partición: %s\t ID: vd%c%i\n",Particiones[PunteroDisco][PunteroParticion],Abecedario[PunteroDisco],PunteroParticion);
+                }
+                PunteroParticion++;
+            }
+            PunteroParticion=0;
+        }
+        PunteroDisco++;
+    }
+
+    if(ExistenParticiones != 0){
+    }
+    else{
+        printf("Error, no se encontraron particiones montadas.\n");
+    }
+/**--------------------------------------------------------------------------------------------------------*/
+
+
         }else if(strcasecmp(Entrada,"exit")==0){
         }else{
             AnalizarEntrada(Entrada);
@@ -648,21 +672,29 @@ if(Size >= 10485760){
     char*nombre=strtok(name,"\"");
 
     char*ruta;
-    if(path[0]=="\""){
+    //if(path[0]=="\""){
     ruta=strtok(path,"\"");
     //strcpy(ruta,strtok(path,"\""));
-    }else{
-    ruta = path;
+    //}else{
+    //ruta = path;
     //strcpy(ruta,path);
-    }
+    //}
 
 
 
-    char ValidarRuta[70]="mkdir -p ";
+    /*char ValidarRuta[100]="mkdir -p ";
 
     strcat(ValidarRuta,ruta);
 
+    system(ValidarRuta);*/
+
+    char ValidarRuta[100]="mkdir -p \"";
+
+    strcat(ValidarRuta,ruta);
+    strcat(ValidarRuta,"\"");
+
     system(ValidarRuta);
+
 
     strcat(ruta,nombre);
 
@@ -985,7 +1017,7 @@ void ReporteDisk(struct MBR mabore,char*ruta){
     fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#103C78\" BORDER=\"2\" WIDTH=\"%i\"><b>MBR</b></TD>", GetWidth(sizeof(mabore),mabore.mbr_tamano));
 
         if((strcmp(mabore.mbr_part_1.part_status,"empty")==0) && (strcmp(mabore.mbr_part_2.part_status,"empty")==0) && (strcmp(mabore.mbr_part_3.part_status,"empty")==0 )&& (strcmp(mabore.mbr_part_4.part_status,"empty")==0 )){
-                fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\" COLSPAN=\"3\" ALIGN=\"center\" PORT=\"there\"><b>Libre</b></TD>");
+                fprintf(fp,"<TD ALIGN=\"center\" bgcolor=\"#60EE23\" BORDER=\"2\" PORT=\"there\"><b>Libre</b></TD>");
         }else{
 
             if(strcmp(mabore.mbr_part_1.part_status,"empty")==0){
@@ -1125,13 +1157,13 @@ void AsignacionID(char* path, char*nombre){
     int PosicionParticion=1;
     int PosicionVertical=1;
     int ParticionExiste=0;
-    char ID[8];
+    char ID[10];
 
 
     if(DiscosMontados<30){
         while(ContadorDiscos<30){
             if((strcmp(Particiones[ContadorDiscos][0] ,path)==0)||(strcmp(Particiones[DiscosMontados][0] ,"")==0)){
-                strcpy(Particiones[ContadorDiscos][0],path);
+                strncpy(Particiones[ContadorDiscos][0],path,sizeof(Particiones[ContadorDiscos][0]));
 
                 while (strcmp(Particiones[ContadorDiscos][PosicionParticion] ,"")!=0 && strcmp(Particiones[ContadorDiscos][PosicionParticion] ,nombre)!=0){
                     PosicionParticion++;
@@ -1148,7 +1180,7 @@ void AsignacionID(char* path, char*nombre){
                     strcpy(Particiones[ContadorDiscos][PosicionParticion] ,nombre);
                     char temporal[10];
                     sprintf(temporal,"vd%c%i",Abecedario[ContadorDiscos], PosicionParticion);
-                    strcpy(ID, temporal);
+                    strncpy(ID, temporal,sizeof(ID));
                     printf("Se montó la partición con éxito, el ID asignado es:%s\n", ID);
                     break;
 
@@ -1167,6 +1199,69 @@ void AsignacionID(char* path, char*nombre){
     }
 
 }
+
+void Reporte(char*path,char*name, char*id){
+if((strcmp(name, "") != 0) && (strcmp(path, "") != 0) && (strcmp(id, "") != 0))
+    {
+
+        path = strtok(path,"\"");
+        char*nombre=strtok(name,"\"");
+
+         char *ID_Disk = malloc(30);
+        strncpy(ID_Disk,id+2,1);
+
+        char *ID_Part = malloc(30);
+        strncpy(ID_Part,id+3,1);
+
+        int PunteroDisco = 0;
+        int PunteroParticion = 0;
+        char *Abecedario = "abcdefghijklmnopqrstuvwxyz";
+
+        PunteroParticion = atof(ID_Part);
+
+        char* Puntero = strchr(Abecedario,*ID_Disk);
+        PunteroDisco = Puntero - Abecedario;
+
+
+
+        if(strcmp(Particiones[PunteroDisco][PunteroParticion],"") != 0) //no existe la partición solicitada
+        {
+            if(strcasecmp(nombre,"mbr") == 0)
+            {
+
+            FILE *discos = fopen (Particiones[PunteroDisco][0], "r+b");
+            struct MBR mbr;
+            fread (&mbr, sizeof(mbr), 1,discos);
+            ReporteMBR(mbr,Particiones[PunteroDisco][0]);
+
+            fclose(discos);
+
+            }
+            else if(strcasecmp(nombre,"disk") == 0)
+            {
+            FILE *discos = fopen (Particiones[PunteroDisco][0], "r+b");
+            struct MBR mbr;
+            fread (&mbr, sizeof(mbr), 1,discos);
+            ReporteDisk(mbr,Particiones[PunteroDisco][0]);
+            fclose(discos);
+
+            }
+            else
+            {
+                printf("Error, el reporte solicitado no existe.");
+            }
+        }
+        else
+        {
+            printf("Error, la partición solicitada no existe.");
+        }
+    }
+    else
+    {
+        printf("Error, faltan parámetros obligatorios.\n");
+    }
+}
+
 
 
 
